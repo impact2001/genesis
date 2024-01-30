@@ -1,7 +1,52 @@
-import React from 'react'
+import { useState } from 'react'
 import { FaTimes } from 'react-icons/fa'
+import { toast } from 'react-toastify'
+import { createProject } from '../services/blockchain'
+import { useGlobalState, setGlobalState } from '../store'
 
 const CreateProject = () => {
+  const [createModal] = useGlobalState('createModal')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [cost, setCost] = useState('')
+  const [date, setDate] = useState('')
+  const [imageURL, setImageURL] = useState('')
+
+  const toTimestamp = (dateStr) => {
+    const dateObj = Date.parse(dateStr)
+    return dateObj / 1000
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!title || !description || !cost || !date || !imageURL) return
+
+    const params = {
+      title,
+      description,
+      cost,
+      expiresAt: toTimestamp(date),
+      imageURL,
+    }
+
+    await createProject(params)
+    toast.success('Project created successfully, will reflect in 30sec.')
+    onClose()
+  }
+
+  const onClose = () => {
+    setGlobalState('createModal', 'scale-0')
+    reset()
+  }
+
+  const reset = () => {
+    setTitle('')
+    setCost('')
+    setDescription('')
+    setImageURL('')
+    setDate('')
+  }
+
   return (
     <div
       className={`fixed top-0 left-0 w-screen h-screen flex
